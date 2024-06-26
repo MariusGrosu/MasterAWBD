@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Book List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1 class="mt-4 mb-4">Book List</h1>
+    <!-- Afisare mesaj de eroare dacă exista un parametru de eroare în URL -->
+    <div th:if="${param.error}" class="alert alert-danger">
+         Eroare la stergerea cartii.
+    </div>
+
+    <!-- Formular de adaugare a unei noi carti -->
+    <div class="mb-4">
+        <h2>Add New Book</h2>
+        <form th:action="@{/book}" method="post">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="authorName" class="form-label">Author Name</label>
+                <input type="text" class="form-control" id="authorName" name="authorName" required>
+            </div>
+            <div class="mb-3">
+                <label for="categoryName" class="form-label">Category Name</label>
+                <input type="text" class="form-control" id="categoryName" name="categoryName" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Book</button>
+        </form>
+    </div>
+
+
+    <div class="mb-4">
+        <h2>Search Books by Author</h2>
+        <form th:action="@{/books/search}" method="get">
+            <div class="mb-3">
+                <label for="authorNameSearch" class="form-label">Author Name</label>
+                <input type="text" class="form-control" id="authorNameSearch" name="authorName" th:value="${authorName}" placeholder="Enter author's name">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+
+    <!-- Lista de carti -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Iterare prin lista de carti -->
+        <tr th:each="book : ${books.content}">
+            <td th:text="${book.title}">Title</td>
+            <td th:text="${book.author.name}">Author</td>
+            <td th:text="${book.category.name}">Category</td>
+            <td>
+<!--                &lt;!&ndash; Buton pentru a vizualiza detalii carte &ndash;&gt;-->
+<!--                <a th:href="@{/book/{id}(id=${book.id})}" class="btn btn-primary">View</a>-->
+<!--                &lt;!&ndash; Buton pentru a gestiona împrumuturile &ndash;&gt;-->
+<!--                <a th:href="@{/book/{id}/loans(id=${book.id})}" class="btn btn-info">Manage Loans</a>-->
+
+                <!-- Formular pentru ștergere carte -->
+                <form th:action="@{/book/delete}" method="post">
+                    <input type="hidden" name="id" th:value="${book.id}" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+
+                <!-- Formular pentru actualizare carte -->
+                <form th:action="@{/book/update/{id}(id=${book.id})}" method="post">
+                    <input type="hidden" name="id" th:value="${book.id}" />
+                    <div class="mb-3">
+                        <label for="newTitle" class="form-label">New Title</label>
+                        <input type="text" class="form-control" id="newTitle" name="newTitle" placeholder="Enter new title" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Afisare paginare -->
+    <div>
+        <ul class="pagination">
+            <li th:class="${books.first} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/books/search(authorName=${authorName}, page=${books.number - 1})}">Previous</a>
+            </li>
+            <li th:each="pageNumber : ${#numbers.sequence(0, books.totalPages - 1)}" th:class="${books.number == pageNumber} ? 'page-item active' : 'page-item'">
+                <a class="page-link" th:href="@{/books/search(authorName=${authorName}, page=${pageNumber})}" th:text="${pageNumber + 1}"></a>
+            </li>
+            <li th:class="${books.last} ? 'page-item disabled' : 'page-item'">
+                <a class="page-link" th:href="@{/books/search(authorName=${authorName}, page=${books.number + 1})}">Next</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Script-uri Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
